@@ -50,6 +50,9 @@ function [p,counts] = histogram_pdf(X, bins)
 %% Get dimensions of the signal
 [N, m] = size(X);
 
+%% Validate the bin specification
+validate_bins(bins, m);
+
 %% Construct bin edges
 
 if iscell(bins)

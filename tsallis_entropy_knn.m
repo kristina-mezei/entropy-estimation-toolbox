@@ -65,23 +65,22 @@ end
 
 
 
-% Selection of appropiate values of q, so that q < k+1
+% Selection of appropriate values of q, so that q < k+1
 valid_q_ind = q < (k + 1);
-valid_q = q(valid_q_ind);
 
-
-if(isempty(valid_q))
+if ~any(valid_q_ind)
     error("Parameter q must be less than k+1!")
 end
 
-
-% Selection of indices for which LPS or KL algorithms are calculated
+% Logical masks indexing directly into the full q vector, so that the
+% entries of the output S stay aligned with the input q. Values of q that
+% are not valid (q >= k+1) keep their preallocated NaN.
 % q≈1 is evaluated using the Kozachenko–Leonenko estimator
 % corresponding to the Shannon entropy limit.
 tol = 1e-8;
 
-indKL = abs(valid_q-1) < tol;
-indLPS  = abs(valid_q-1) >= tol;
+indKL  = valid_q_ind & (abs(q-1) <  tol);
+indLPS = valid_q_ind & (abs(q-1) >= tol);
 
 
 % Distances to knn:
@@ -127,14 +126,14 @@ if any(indLPS)
 
     % Iq calculation:
     % zeta is calculated with the use of logarithm
-    alpha = reshape(1-valid_q(indLPS),1,[]);
+    alpha = reshape(1-q(indLPS),1,[]);
     log_zeta = alpha.*log_norm + gammaln(k) - gammaln(k+alpha) + alpha.*logVm + m*alpha.*log_rho;
 
-    % The computation of the Rényi functional was implemented using a numerically stable log-sum-exp transformation to avoid overflow in large-sample regimes.
+    % The computation of the Tsallis functional was implemented using a numerically stable log-sum-exp transformation to avoid overflow in large-sample regimes.
     a = max(log_zeta,[],1);             % reference shift
     log_mean_exp = a + log(mean(exp(log_zeta - a), 1, 'omitnan'));
     Iq(indLPS) = exp(log_mean_exp);
-    S(indLPS) = (1-Iq(indLPS))./(valid_q(indLPS)-1);
+    S(indLPS) = (1-Iq(indLPS))./(q(indLPS)-1);
 
 end
 

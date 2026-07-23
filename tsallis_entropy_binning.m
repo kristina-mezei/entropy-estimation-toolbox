@@ -30,52 +30,19 @@ function Sq = tsallis_entropy_binning(X, q, bins)
 
 % Input checking
 
-% arguments
-%     X  (:,:) double {mustBeNonempty}
-%     q  (1,:) double {mustBeNonempty}
-% end
+arguments
+    X  (:,:) double {mustBeNonempty}
+    q  (1,:) double {mustBeNonempty, mustBeReal}
+    bins
+end
 
 %% Get dimensions of the signal
-[N, m] = size(X);
+[~, m] = size(X);
 
-if isscalar(bins)
-    if ~(isnumeric(bins) && isscalar(bins) && isfinite(bins) && bins > 0 && bins == floor(bins))
-        error('Parameter "bins" must be a positive integer scalar.');
-    end
-end
-if isvector(bins) && any(size(bins) - [1 1])
-    bins = bins(:);
-    if numel(bins) ~= m
-        error('The number of bins must be scalar or have one element per variable.');
-    end
-    for i = 1:m
-        if ~(isnumeric(bins(i)) && isscalar(bins(i)) && isfinite(bins(i)) && bins(i) > 0 && bins(i) == floor(bins(i)))
-            error('Parameter "bins" must be a positive integer scalar.');
-        end
-    end
+% Validate the bin specification
+validate_bins(bins, m);
 
-end
-
-if iscell(bins)
-
-    if numel(bins) ~= m
-        error('The number of edge vectors must equal the number of variables.');
-    end
-
-
-    for i = 1:m
-        if numel(bins{i}) < 2
-            error('Each bins vector must contain at least two elements.');
-        end
-    end
-end
-
-
-
-
-
-
-% Initialization of variables
+% Initialization of variables (row vector: one entropy value per q)
 Sq = NaN(1, length(q));
 
 
